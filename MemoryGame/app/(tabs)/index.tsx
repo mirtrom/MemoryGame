@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, Modal } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';  // Import Bootstrap Icons
 
-// Define the number of cards and create an array of icons
 const icons = ['coffee', 'apple-alt', 'anchor', 'bell', 'bolt', 'car', 'cloud', 'crown'];
 const iconsPairs = [...icons, ...icons]; // Create pairs of icons
 
@@ -24,6 +23,7 @@ const MemoryGame = () => {
   
   const [selectedCards, setSelectedCards] = useState<any[]>([]);
   const [moves, setMoves] = useState(0);
+  const [isModalVisible, setModalVisible] = useState(false);  // State for modal visibility
 
   useEffect(() => {
     if (selectedCards.length === 2) {
@@ -46,6 +46,12 @@ const MemoryGame = () => {
     }
   }, [selectedCards]);
 
+  useEffect(() => {
+    if (cards.every(card => card.isMatched)) {  // Check if all cards are matched
+      setModalVisible(true);  // Show winning modal
+    }
+  }, [cards]);
+
   const handleCardPress = (index: number) => {
     if (selectedCards.length === 2) return;  // Prevent selecting more than two cards at a time
 
@@ -65,6 +71,7 @@ const MemoryGame = () => {
     }))));
     setSelectedCards([]);
     setMoves(0);
+    setModalVisible(false);  // Hide modal when game is reset
   };
 
   return (
@@ -91,6 +98,24 @@ const MemoryGame = () => {
       <TouchableOpacity style={styles.resetButton} onPress={resetGame}>
         <Text style={styles.resetButtonText}>Reset Game</Text>
       </TouchableOpacity>
+
+      {/* Winning Modal */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Congratulations!</Text>
+            <Text style={styles.modalText}>You won the game in {moves} moves!</Text>
+            <TouchableOpacity style={styles.modalButton} onPress={resetGame}>
+              <Text style={styles.modalButtonText}>Play Again</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -133,6 +158,37 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   resetButtonText: {
+    color: '#fff',
+    fontSize: 18,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+  modalButton: {
+    padding: 10,
+    backgroundColor: '#1e90ff',
+    borderRadius: 5,
+  },
+  modalButtonText: {
     color: '#fff',
     fontSize: 18,
   },
